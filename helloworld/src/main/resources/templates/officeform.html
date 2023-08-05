@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Office Form</title>
+</head>
+<body>
+<!-- we use *  to POST data and  $ to GET data i.e. *{varName} & i${varName}  -->
+	<form action="#" th:action="@{/saveoffice}" th:object="${office}" method="post">
+		<p>Office Id : <input type="text" th:field="*{officeId}"/></p>
+		<p>Office Name : <input type="text" th:field="*{officeName}"/></p>
+		<div th:object="@{address}">
+		<p>Address Id : <input type="text" th:field="*{addressId}"/></p>
+		<p>Address Street : <input type="text" th:field="*{street}"/></p>
+		<p>Address city : <input type="text" th:field="*{city}"/></p>
+		<p>Address Country : <input type="text" th:field="*{country}"/></p>
+
+		<p><input type="submit" value="Submit"/></p>
+	</form>
+</body>
+</html> 

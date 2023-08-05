@@ -1,0 +1,21 @@
+package com.pecuniaPay.services;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.pecuniaPay.entity.Customer;
+import com.pecuniaPay.repositories.CustomerRepositories;
+
+@Service
+public class CustomerServiceImpl implements CustomerService{
+
+	@Autowired
+	private CustomerRepositories customerRepository;
+	
+	@Override
+	public Optional<Customer> getCustomerDetailsById(Long id) {
+		return customerRepository.findById(id);
+	}
+
+}

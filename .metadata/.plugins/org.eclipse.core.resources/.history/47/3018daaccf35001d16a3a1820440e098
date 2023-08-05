@@ -1,0 +1,5 @@
+package com.pecuniaPay.entity;
+
+public class Customer {
+
+}

@@ -1,0 +1,12 @@
+package string;
+
+public class Testimmutablestring {
+
+	public static void main(String[] args) {
+		String s="sachin";
+		s.concat("Tendulakar");
+		System.out.println(s);
+
+	}
+
+}

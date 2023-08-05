@@ -1,0 +1,5 @@
+package com.pecuniaPay.services;
+
+public class RegistrationServiceImpl {
+
+}

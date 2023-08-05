@@ -1,0 +1,12 @@
+package com.pecuniaPay.repositories;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.pecuniaPay.entity.Registration;
+import com.pecuniaPay.registration.entities.Customer;
+
+@Repository
+public interface RegistrationRepository extends CrudRepository<Registration, Long> {
+
+}

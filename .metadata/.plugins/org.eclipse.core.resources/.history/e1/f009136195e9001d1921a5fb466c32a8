@@ -1,0 +1,34 @@
+package com.jpa.test;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import com.jpa.test.dao.UserRepository;
+import com.jpa.test.entities.User;
+
+@SpringBootApplication
+@Configuration
+@EnableJpaRepositories(basePackages = {"com.jpa.test.dao.UserRepository"})
+public class BootjpaexampleApplication {
+
+	public static void main(String[] args) {
+	ApplicationContext context=	SpringApplication.run(BootjpaexampleApplication.class, args);
+	
+	UserRepository userRepository=context.getBean(UserRepository.class);
+	
+	User user=new User();
+	user.setId(123);
+	user.setName("Sachin Yadav");
+	user.setCity("jaunpur");
+	user.setStatus("completed");
+	userRepository.save(user);
+	System.out.println(user);
+	
+	}
+
+}

@@ -1,0 +1,21 @@
+package string;
+
+public class Testimmutablestring {
+
+	public static void main(String[] args) {
+		String s="sachin";
+		 s= s.concat("Tendulakar");
+		System.out.println(s);
+		String s1="sachin";
+		String s2="SACHIN";
+		String s3=new String("sachin");
+		String s4="Ratan";
+		
+		System.out.println(s1.equals(s2));
+		System.out.println(s1.equalsIgnoreCase(s2));
+		System.out.println(s1==s3);
+		System.out.println(s1.compareTo(s2));
+
+	}
+
+}

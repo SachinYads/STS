@@ -1,0 +1,48 @@
+package com.sts;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+
+public class OltController {
+	@GetMapping("/oltmapping")
+	 public static void main(String[] args) {
+	        List<String[]> finalData = new ArrayList<>();
+	        List<String[]> invLatest = new ArrayList<>();
+	        
+	        try (BufferedReader dfReader = new BufferedReader(new FileReader("OLT_data_new.csv"));
+	             BufferedReader invReader = new BufferedReader(new FileReader("Inventory_data_new.csv"))) {
+	            
+	            String line;
+	            
+	            // Read OLT_data_new.csv
+	            while ((line = dfReader.readLine()) != null) {
+	                String[] data = line.split(",");
+	                finalData.add(data);
+	            }
+	            
+	            // Read Inventory_data_new.csv
+	            while ((line = invReader.readLine()) != null) {
+	                String[] data = line.split(",");
+	                invLatest.add(data);
+	            }
+	            
+	            System.out.println("--here");
+	            
+	            // Print the data from OLT_data_new.csv
+	            for (String[] data : finalData) {
+	                for (String value : data) {
+	                    System.out.print(value + " ");
+	                }
+	                System.out.println(finalData);
+	            }
+	            
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+}

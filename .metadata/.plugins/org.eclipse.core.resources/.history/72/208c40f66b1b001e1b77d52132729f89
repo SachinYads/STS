@@ -1,0 +1,686 @@
+package com.sts;
+
+import java.awt.PageAttributes.MediaType;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.catalina.connector.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
+
+import jakarta.security.auth.message.callback.PrivateKeyCallback.Request;
+/// these one is run properly
+@RestController
+@CrossOrigin(origins = "http://localhost:4200")
+public class TestController {
+	
+	 @RestController
+	    @RequestMapping("/olt_geo")
+	    public class OltGeoController {
+
+	        @GetMapping
+	        @PostMapping
+	        public ResponseEntity<List<Object>> getZoneLatLong() {
+	            List<Object> finalData = new ArrayList<>();
+
+	            try {
+	                CSVReader dfReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv"));
+	                List<String[]> dfList = dfReader.readAll();
+	                dfReader.close();
+	                CSVReader invReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv"));
+	                List<String[]> invList = invReader.readAll();
+	                invReader.close();
+
+	                System.out.println("--here");
+
+	                for (int z = 0; z < dfList.size(); z++) {
+	                    String[] dfRow = dfList.get(z);
+
+	                    System.out.println(z);
+	                    Map<String, String> resp = new HashMap<>();
+	                    List<Object> row = new ArrayList<>();
+
+	                    for (int i = 0; i < dfRow.length; i++) {
+	                        String columnName = dfList.get(0)[i];
+	                        String columnValue = dfRow[i];
+	                        resp.put(columnName, columnValue);
+	                    }
+
+	                    String OLT_NE_ID = dfRow[1];
+	                    String latitude = dfRow[32];
+	                    String longitude = dfRow[33];
+	                    int invCount = 0;
+
+	                    for (String[] invRow : invList) {
+	                        String olt = invRow[1];
+	                        if (olt.equals(OLT_NE_ID)) {
+	                            invCount++;
+	                        }
+	                    }
+
+	                    row.add(OLT_NE_ID);
+	                    row.add(latitude);
+	                    row.add(longitude);
+	                    row.add(resp);
+	                    row.add(invCount);
+
+	                    finalData.add(row);
+	                }
+
+	                return ResponseEntity.ok(finalData);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	            }
+	        }
+	    }
+	 @GetMapping("/ont_geo")//done
+	    public List<Object> getONTGeo() {
+	        List<Object> finalData = new ArrayList<>();
+
+	        try {
+	            
+	            CSVReader ontDataReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\ONT_data_new.csv"));
+	            String[] ontHeaders = ontDataReader.readNext();
+	            String[] ontRecord;
+	            while ((ontRecord = ontDataReader.readNext()) != null) {
+	                String serialNumber = ontRecord[6];
+	                String latitude = ontRecord[17];
+	                String longitude = ontRecord[16];
+
+	                // Get additional data for the ONT
+	                Map<String, String> additionalData = new HashMap<>();
+	                for (int i = 0; i < ontHeaders.length; i++) {
+	                    additionalData.put(ontHeaders[i], ontRecord[i]);
+	                }
+
+	                // Create the final data object
+	                Object[] data = {serialNumber, latitude, longitude, additionalData};
+	                finalData.add(data);
+	            }
+	            ontDataReader.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return finalData;
+	    }
+
+	  
+	
+	 @RestController
+	 @RequestMapping("/polyline_data")
+     public class PolylineDataController {
+
+	     @PostMapping
+	     public List<List<List<Double>>> polylineData(@RequestBody Map<String, String> oltId) {
+	         System.out.println("break check 1");
+	         String oltIdValue = oltId.get("OLT");
+	         System.out.println("break check 2");
+	         System.out.println("old id: " + oltIdValue);
+
+	       //  System.out.println(inventoryData);
+
+	         List<String[]> oltData = readCSV("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv");
+	       	 List<String[]> oltLatLong = new ArrayList<>();
+	         for (String[] row : oltData) {
+	             if (row[1].equals(oltIdValue)) {
+	                 oltLatLong.add(row);
+	                              }
+	         }
+	         System.out.println("here: " + oltLatLong);
+
+//	         List<String[]> ontData = readCSV("D:\\KPN_DEMO\\BackEnd\\ONT_data_new.csv");
+	         System.out.println("check print1: ");
+	         List<String[]> inventoryData = readCSV("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv");
+
+	         String csvFile = "D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv";
+
+	         List<String> serialNumbers = new ArrayList<>();
+
+	         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+	             String line;
+	             boolean headerSkipped = false;
+
+	             while ((line = br.readLine()) != null) {
+	                 if (!headerSkipped) {
+	                     headerSkipped = true;
+	                     continue;
+	                 }
+
+	                 String[] data = line.split(",");
+	                 String olt = data[0];
+	                 String serialNumber = data[1];
+
+	                 if (olt.equals(oltId)) {
+	                     serialNumbers.add(serialNumber);
+	                 }
+	             }
+	         } catch (IOException e) {
+	             e.printStackTrace();
+	         }
+              System.out.println(serialNumbers);
+	         // Use the serialNumbers list as needed
+	     }
+	 }
+	
+
+
+
+
+//
+//	         List<String> serialNumbers = new ArrayList<>();
+//	         for (String[] row : inventoryData) {
+//	             if (row[1].equals(oltIdValue)) {
+//	                 serialNumbers.add(row[5]);
+//	             }
+//	         }
+//
+          List<List<List<Double>>> latLong = new ArrayList<>();
+//	         for (String ont : serialNumbers) {
+//	             System.out.println(ont);
+//
+//	             List<String[]> ontLatLong = new ArrayList<>();
+//	             for (String[] row : ontData) {
+//	                 if (row[0].equals(ont)) {
+//	                     ontLatLong.add(row);
+//	                 }
+//	             }
+//	             System.out.println(ontLatLong);
+//
+//	             List<List<Double>> coordinates = new ArrayList<>();
+//	             coordinates.add(Arrays.asList(
+//	                     Double.parseDouble(oltLatLong.get(0)[1]),
+//	                     Double.parseDouble(oltLatLong.get(0)[2])
+//	             ));
+//	             coordinates.add(Arrays.asList(
+//	                     Double.parseDouble(ontLatLong.get(0)[1]),
+//	                     Double.parseDouble(ontLatLong.get(0)[2])
+//	             ));
+//
+//	             latLong.add(coordinates);
+//	         }
+//
+//	         System.out.println("lat log data from polyline data: " + latLong);
+	         return latLong;
+	     }
+
+	     private List<String[]> readCSV(String filePath) {
+	         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+	             return reader.readAll();
+	         } catch (IOException | CsvException e) {
+	             e.printStackTrace();
+	         }
+	         return new ArrayList<>();
+	     }
+	 }
+}
+//	 @PostMapping("/polyline_data")
+//	 public List<List<List<Double>>> getPolylineData(@RequestBody OltIdRequest olt_id) {
+//	     List<List<List<Double>>> latLong = new ArrayList<>();	  
+//
+//	     try {
+//
+//	         CSVReader oltDataReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv"));
+//	         String[] oltDataHeader = oltDataReader.readNext(); // Skip header line
+//	         String[] oltRecord;
+//
+//	         while ((oltRecord = oltDataReader.readNext()) != null) {
+//	             String oltNEID = oltRecord[0];
+//	             Double oltLatitude = Double.parseDouble(oltRecord[1]);
+//	             Double oltLongitude = Double.parseDouble(oltRecord[2]);
+//
+//	  
+//
+//	             if (oltNEID.equals("DTAL008")) {
+//
+//	                 CSVReader inventoryDataReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv"));
+//	                 String[] inventoryDataHeader = inventoryDataReader.readNext();
+//	                 String[] inventoryRecord;
+//
+//	                 while ((inventoryRecord = inventoryDataReader.readNext()) != null) {
+//	                     String olt = inventoryRecord[0];
+//	                     String serialNumber = inventoryRecord[1];
+//
+//	  
+//
+//	                     if (olt.equals(oltNEID)) {
+//
+//	                         CSVReader ontDataReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\ONT_data_new.csv"));
+//	                         String[] ontDataHeader = ontDataReader.readNext(); // Skip header line
+//	                         String[] ontRecord;
+//
+//	                         while ((ontRecord = ontDataReader.readNext()) != null) {
+//	                             String ontSerialNumber = ontRecord[0];
+//	                             Double ontLatitude = Double.parseDouble(ontRecord[1]);
+//	                             Double ontLongitude = Double.parseDouble(ontRecord[2]);
+//
+//	  
+//
+//	                             if (ontSerialNumber.equals(serialNumber)) {
+//	                                 // Create the lat-long coordinates for the polyline
+//	                                 List<List<Double>> polylineCoordinates = new ArrayList<>();
+//	                                 polylineCoordinates.add(List.of(oltLatitude, oltLongitude));
+//	                                 polylineCoordinates.add(List.of(ontLatitude, ontLongitude));
+//	                                 latLong.add(polylineCoordinates);
+//
+//	  
+//
+//	                                 break;
+//	                             }
+//	                         }
+//	                         ontDataReader.close();
+//
+//	  
+//
+//	                         break;
+//	                     }
+//	                 }
+//	                 inventoryDataReader.close();
+//
+//	  
+//
+//	                 break;
+//	             }
+//	         }
+//	         oltDataReader.close();
+//	     } catch (Exception e) {
+//	         e.printStackTrace();
+//	     }
+//
+//	     return latLong;
+//	 }
+//
+//	  
+//
+//	 public static class OltIdRequest {
+//	     private String OLT;
+//
+//	  
+//
+//	     public String getOLT() {
+//	         return OLT;
+//	     }
+//
+//	  
+//
+//	     public void setOLT(String OLT) {
+//	         this.OLT = OLT;
+//	     }
+//	 }
+	/*@GetMapping("/olt_geo")
+    public List<Object> getZoneLatLong() throws IOException {
+        List<Object> finalData = new ArrayList<>();
+        Path csvPath = Paths.get("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv");
+        List<String> lines = Files.readAllLines(csvPath);
+
+        for (int z = 0; z < lines.size(); z++) {
+            String[] columns = lines.get(z).split(",");
+            String oltNeId = columns[0];
+            //int latitude = int.parseint(columns[1]);
+            double longitude = Double.parseDouble(columns[2]);
+
+            Map<String, String> resp = new HashMap<>();
+            for (int i = 3; i < columns.length; i++) {
+                resp.put(lines.get(0).split(",")[i], columns[i]);
+            }
+
+            Path invCsvPath = Paths.get("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv");
+            List<String> invLines = Files.readAllLines(invCsvPath);
+            int count = 0;
+            for (String invLine : invLines) {
+                String[] invColumns = invLine.split(",");
+                if (invColumns[0].equals(oltNeId)) {
+                    count++;
+                }
+            }
+
+            List<Object> dataEntry = new ArrayList<>();
+            dataEntry.add(oltNeId);
+          //  dataEntry.add(latitude);
+            dataEntry.add(longitude);
+            dataEntry.add(resp);
+            dataEntry.add(count);
+
+            finalData.add(dataEntry);
+        }
+
+        return finalData;
+    }
+
+	
+	@GetMapping("/get_zone")
+    public String getZoneNames() throws IOException {
+        ClassPathResource resource = new ClassPathResource("Zone_data.csv");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+
+        List<String> zoneNames = new ArrayList<>();
+
+        // Skip the header line
+        reader.readLine();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] values = line.split(",");
+            zoneNames.add(values[1]);
+        }
+
+        reader.close();
+
+        // Convert the list to JSON using Gson
+        Gson gson = new Gson();
+        return gson.toJson(zoneNames);
+    }
+	//////////////////////////////////////
+	//These one aloso give proper result
+	@RestController
+	@RequestMapping("/alarms_table")
+	public class AlarmsController {
+
+	    @GetMapping(produces = "application/json")
+	    public String getAlarmsData() throws IOException {
+	        ClassPathResource resource = new ClassPathResource("alarms_data.json");
+	        InputStream inputStream = resource.getInputStream();
+	        String alarmsData = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+	        return alarmsData;
+	    }}
+/////////////////////////////////////////////////////////////////////////////////////
+	//These one also give proper result
+	@RestController
+	@RequestMapping("/alarm_cards")
+	public class AlarmCardsController {
+		@PostMapping
+	    public ResponseEntity<Object> getAlarmCards(@RequestBody DurationRequest requestData) {
+	        String duration = requestData.getDuration();
+
+	        if (duration.equalsIgnoreCase("24hr")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":1},\"Clear\":{\"critical\":0,\"major\":0,\"minor\":1}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1week")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":4,\"equipmentAlarm\":2},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":1,\"SA_SERVICE_AFFECTING\":5},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":2},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1month")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":4,\"minor\":7},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else {
+	            String errorMessage = "{\"error\":\"Invalid duration\"}";
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	        }
+	    }
+
+	    public static class DurationRequest {
+	        private String duration;
+
+	        public String getDuration() {
+	            return duration;
+	        }
+
+	        public void setDuration(String duration) {
+	            this.duration = duration;
+	        }
+	    }
+	}
+	@RestController
+	public class InventoryController {
+
+	    public static class FilterRequest {
+	        private String zone;
+
+	        public String getZone() {
+	            return zone;
+	        }
+
+	        public void setZone(String zone) {
+	            this.zone = zone;
+	        }
+	    }
+
+	    public static class FilterResponse {
+	        private Set<String> sites;
+	        private Set<String> olts;
+	        private List<String> onts;
+
+	        public Set<String> getSites() {
+	            return sites;
+	        }
+
+	        public void setSites(Set<String> sites) {
+	            this.sites = sites;
+	        }
+
+	        public Set<String> getOlts() {
+	            return olts;
+	        }
+
+	        public void setOlts(Set<String> olts) {
+	            this.olts = olts;
+	        }
+
+	        public List<String> getOnts() {
+	            return onts;
+	        }
+
+	        public void setOnts(List<String> onts) {
+	            this.onts = onts;
+	        }
+	    }
+///////////////////////////////////////////////////////
+	    @RestController
+	    @RequestMapping("/filter")
+	    public class FilterController {
+
+	        
+	           @PostMapping
+	       	   public JSONObject filterData(@RequestBody String zone) {
+	            String filePath = "C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv";
+	            List<String[]> data = readCSV(filePath);
+	            JSONObject zoneJson = new JSONObject(zone);
+	            String selectedZone = zoneJson.getString("Zone");
+	            System.out.println(selectedZone);
+	            List<String[]> filteredData = new ArrayList<>();
+	            System.out.println(data);
+	           /* for (String[] row : data) {
+	                if (row[0].equals(selectedZone)) {
+	                    filteredData.add(row);
+	                }
+	            }
+	            List<String[]> filteredRows = new ArrayList<>();
+
+	            for (String[] row : data) {
+	                if (row[0].equals(selectedZone)) {
+	                    filteredRows.add(row);
+	                }
+	            }
+	            System.out.println(filteredRows);
+	            List<String> site = new ArrayList<>();
+	            List<String> olt = new ArrayList<>();
+	            List<String> ont = new ArrayList<>();
+	            for (String[] row : filteredData) {
+	                site.add(row[6]);
+	                olt.add(row[1]);
+	                ont.add(row[4]);
+	            }
+	            Set<String> uniqueSites = new HashSet<>(site);
+	            Set<String> uniqueOlts = new HashSet<>(olt);
+	            JSONObject resp = new JSONObject();
+	            resp.put("sites", new ArrayList<>(uniqueSites));
+	            resp.put("olts", new ArrayList<>(uniqueOlts));
+	            resp.put("onts", ont);
+	            JSONObject response = new JSONObject();
+	            response.put("resp", resp);
+	            return response;
+	        }
+
+	        private List<String[]> readCSV(String filePath) {
+	            List<String[]> data = new ArrayList<>();
+	            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+	                String line;
+	                while ((line = br.readLine()) != null) {
+	                    String[] row = line.split(",");
+	                    data.add(row);
+	                }
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	            return data;
+	        }
+	       
+	    }
+	  /// It gives not any olt ont sites 
+	//////////////////////////////////////////////////
+	    @GetMapping("/olt_geo")
+	    public List<Object> getZoneLatLong() throws IOException {
+	        List<Object> finalData = new ArrayList<>();
+	        Path csvPath = Paths.get("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv");
+	        List<String> lines = Files.readAllLines(csvPath);
+
+	        for (int z = 0; z < lines.size(); z++) {
+	            String[] columns = lines.get(z).split(",");
+	            String oltNeId = columns[0];
+	            //int latitude = int.parseint(columns[1]);
+	            double longitude = Double.parseDouble(columns[2]);
+
+	            Map<String, String> resp = new HashMap<>();
+	            for (int i = 3; i < columns.length; i++) {
+	                resp.put(lines.get(0).split(",")[i], columns[i]);
+	            }
+
+	            Path invCsvPath = Paths.get("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv");
+	            List<String> invLines = Files.readAllLines(invCsvPath);
+	            int count = 0;
+	            for (String invLine : invLines) {
+	                String[] invColumns = invLine.split(",");
+	                if (invColumns[0].equals(oltNeId)) {
+	                    count++;
+	                }
+	            }
+
+	            List<Object> dataEntry = new ArrayList<>();
+	            dataEntry.add(oltNeId);
+	          //  dataEntry.add(latitude);
+	            dataEntry.add(longitude);
+	            dataEntry.add(resp);
+	            dataEntry.add(count);
+
+	            finalData.add(dataEntry);
+	        }
+
+	        return finalData;
+	    }
+	 /*   @GetMapping("/oltmapping")
+		 public static void main(String[] args) {
+		        List<String[]> finalData = new ArrayList<>();
+		        List<String[]> invLatest = new ArrayList<>();
+		        
+		        try (BufferedReader dfReader = new BufferedReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv"));
+		             BufferedReader invReader = new BufferedReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv"))) {
+		            
+		            String line;
+		            
+		            // Read OLT_data_new.csv
+		            while ((line = dfReader.readLine()) != null) {
+		                String[] data = line.split(",");
+		                finalData.add(data);
+		            }
+		            
+		            // Read Inventory_data_new.csv
+		            while ((line = invReader.readLine()) != null) {
+		                String[] data = line.split(",");
+		                invLatest.add(data);
+		            }
+		            
+		            System.out.println("--here");
+		            
+		            // Print the data from OLT_data_new.csv
+		            for (String[] data : finalData) {
+		                for (String value : data) {
+		                    System.out.print(value + " ");
+		                }
+		                System.out.println(finalData);
+		            }
+		            for (int z = 0; z < finalData.size(); z++) {
+		               System.out.println(z);
+		            }
+		            int z = 0; // Assuming z is the index
+		            String[] targetOLT_NE_ID = finalData.get(z);
+
+		            List<String[]> data = new ArrayList<>();
+		            for (String[] row : finalData) {
+		                if (row[1].equals(targetOLT_NE_ID[1])) {
+		                    data.add(row);
+		                }
+		            
+		            
+		            System.out.println("data: " + data);
+		           		            
+		            }  
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+		    }
+	   */
+
+	   	    
+	   	   
+	
+
+	
+
+
+	
+
+
+
+
+
+
+
+	
+	
+   

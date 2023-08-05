@@ -1,0 +1,58 @@
+package com.sts;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.opencsv.CSVReader;
+
+public class GeoMapController {
+	
+	@GetMapping("/ont_geo")//done
+	    public List<Object> getONTGeo() {
+	        List<Object> finalData = new ArrayList<>();
+
+	        try {
+	            
+	            CSVReader ontDataReader = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+	            String[] ontHeaders = ontDataReader.readNext();
+	            String[] ontRecord;
+	            while ((ontRecord = ontDataReader.readNext()) != null) {
+	                String serialNumber = ontRecord[0];
+	                String latitude = ontRecord[1];
+	                String longitude = ontRecord[2];
+
+	                // Get additional data for the ONT
+	                Map<String, String> additionalData = new HashMap<>();
+	                for (int i = 3; i < ontHeaders.length; i++) {
+	                    additionalData.put(ontHeaders[i], ontRecord[i]);
+	                }
+
+	                // Create the final data object
+	                Object[] data = {serialNumber, latitude, longitude, additionalData};
+	                finalData.add(data);
+	            }
+	            ontDataReader.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return finalData;
+	    }
+
+	  }
+
+	  ////////////////////////////////////////////////////////////////////////////////////////
+	   

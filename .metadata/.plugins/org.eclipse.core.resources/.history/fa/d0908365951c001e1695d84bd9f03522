@@ -1,0 +1,703 @@
+package com.sts;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.json.JSONObject;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.google.gson.Gson;
+import com.opencsv.CSVReader;
+@RestController
+public class ServiceInventoryController {
+	
+	
+		 @GetMapping("/service_inventory")
+		    public String getAlarmsData() throws IOException {
+		        ClassPathResource resource = new ClassPathResource("Inventory.json");
+		        InputStream inputStream = resource.getInputStream();
+		        String serviceInventory = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+		        return serviceInventory;
+		    }
+		 
+		 @GetMapping("/retail_onnet")
+		    public String getretailonnet() throws IOException {
+		        ClassPathResource resource = new ClassPathResource("C:\\Users\\sachin.ys\\Downloads\\sat\\rn.json");
+		        InputStream inputStream = resource.getInputStream();
+		        String retailOnnet = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+		        return retailOnnet;
+		    }
+		 @GetMapping("/retail_offnet")
+		    public String getretailofnet() throws IOException {
+		        ClassPathResource resource = new ClassPathResource("C:\\Users\\sachin.ys\\Downloads\\sat\\rf.json");
+		        InputStream inputStream = resource.getInputStream();
+		        String retailoffnet = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+		        return retailoffnet;
+		    }
+
+
+    
+
+/// In a service_table and popup_info they show key error
+@GetMapping("/get_zone")
+public String getZoneNames() throws IOException {
+    ClassPathResource resource = new ClassPathResource("Zone_data.csv");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+
+    List<String> zoneNames = new ArrayList<>();
+
+    // Skip the header line
+    reader.readLine();
+
+    String line;
+    while ((line = reader.readLine()) != null) {
+        String[] values = line.split(",");
+        zoneNames.add(values[1]);
+    }
+
+    reader.close();
+
+    // Convert the list to JSON using Gson
+    Gson gson = new Gson();
+    return gson.toJson(zoneNames);
+}
+//////////////////////////////////////
+//These one aloso give proper result
+@RestController
+@RequestMapping("/alarms_table")
+public class AlarmsController {
+
+    @GetMapping(produces = "application/json")
+    public String getAlarmsData() throws IOException {
+        ClassPathResource resource = new ClassPathResource("alarms_data.json");
+        InputStream inputStream = resource.getInputStream();
+        String alarmsData = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        return alarmsData;
+    }}
+/////////////////////////////////////////////////////////////////////////////////////
+//These one also give proper result
+@RestController
+@RequestMapping("/alarm_cards")
+public class AlarmCardsController {
+	@PostMapping
+    public ResponseEntity<Object> getAlarmCards(@RequestBody DurationRequest requestData) {
+        String duration = requestData.getDuration();
+
+        if (duration.equalsIgnoreCase("24hr")) {
+            System.out.println(duration);
+            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":1},\"Clear\":{\"critical\":0,\"major\":0,\"minor\":1}}}}";
+            return ResponseEntity.ok(response);
+        } else if (duration.equalsIgnoreCase("1week")) {
+            System.out.println(duration);
+            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":4,\"equipmentAlarm\":2},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":1,\"SA_SERVICE_AFFECTING\":5},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":2},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+            return ResponseEntity.ok(response);
+        } else if (duration.equalsIgnoreCase("1month")) {
+            System.out.println(duration);
+            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":4,\"minor\":7},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+            return ResponseEntity.ok(response);
+        } else {
+            String errorMessage = "{\"error\":\"Invalid duration\"}";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+        }
+    }
+
+    public static class DurationRequest {
+        private String duration;
+
+        public String getDuration() {
+            return duration;
+        }
+
+        public void setDuration(String duration) {
+            this.duration = duration;
+        }
+    }
+}
+@RestController
+public class InventoryController {
+
+    public static class FilterRequest {
+        private String zone;
+
+        public String getZone() {
+            return zone;
+        }
+
+        public void setZone(String zone) {
+            this.zone = zone;
+        }
+    }
+
+    public static class FilterResponse {
+        private Set<String> sites;
+        private Set<String> olts;
+        private List<String> onts;
+
+        public Set<String> getSites() {
+            return sites;
+        }
+
+        public void setSites(Set<String> sites) {
+            this.sites = sites;
+        }
+
+        public Set<String> getOlts() {
+            return olts;
+        }
+
+        public void setOlts(Set<String> olts) {
+            this.olts = olts;
+        }
+
+        public List<String> getOnts() {
+            return onts;
+        }
+
+        public void setOnts(List<String> onts) {
+            this.onts = onts;
+        }
+    }
+///////////////////////////////////////////////////////
+    @RestController
+    @RequestMapping("/filter")
+    public class FilterController {
+
+        
+           @PostMapping
+       	   public JSONObject filterData(@RequestBody String zone) {
+            String filePath = "D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv";
+            List<String[]> data = readCSV(filePath);
+            JSONObject zoneJson = new JSONObject(zone);
+            String selectedZone = zoneJson.getString("Zone");
+            System.out.println(selectedZone);
+            List<String[]> filteredData = new ArrayList<>();
+            System.out.println(data);
+            List<String[]> filteredRows = new ArrayList<>();
+
+            for (String[] row : data) {
+                if (row[6].equals(selectedZone)) {
+                    filteredRows.add(row);
+                }
+            }
+            System.out.println(filteredRows);
+            List<String> site = new ArrayList<>();
+            List<String> olt = new ArrayList<>();
+            List<String> ont = new ArrayList<>();
+            for (String[] row : filteredData) {
+                site.add(row[6]);
+                olt.add(row[1]);
+                ont.add(row[4]);
+            }
+            Set<String> uniqueSites = new HashSet<>(site);
+            Set<String> uniqueOlts = new HashSet<>(olt);
+            JSONObject resp = new JSONObject();
+            resp.put("sites", new ArrayList<>(uniqueSites));
+            resp.put("olts", new ArrayList<>(uniqueOlts));
+            resp.put("onts", ont);
+            JSONObject response = new JSONObject();
+            response.put("resp", resp);
+            return response;
+        }
+
+        private List<String[]> readCSV(String filePath) {
+            List<String[]> data = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] row = line.split(",");
+                    data.add(row);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return data;
+        }
+       
+    }
+       @GetMapping("/oltmapping")
+	 public static void main(String[] args) {
+	        List<String[]> finalData = new ArrayList<>();
+	        List<String[]> invLatest = new ArrayList<>();
+	        
+	        try (BufferedReader dfReader = new BufferedReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv"));
+	             BufferedReader invReader = new BufferedReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv"))) {
+	            
+	            String line;
+	            
+	            // Read OLT_data_new.csv
+	            while ((line = dfReader.readLine()) != null) {
+	                String[] data = line.split(",");
+	                finalData.add(data);
+	            }
+	            
+	            // Read Inventory_data_new.csv
+	            while ((line = invReader.readLine()) != null) {
+	                String[] data = line.split(",");
+	                invLatest.add(data);
+	            }
+	            
+	            System.out.println("--here");
+	            
+	            // Print the data from OLT_data_new.csv
+	            for (String[] data : finalData) {
+	                for (String value : data) {
+	                    System.out.print(value + " ");
+	                }
+	                System.out.println(finalData);
+	            }
+	            for (int z = 0; z < finalData.size(); z++) {
+	               System.out.println(z);
+	            }
+	            int z = 0; // Assuming z is the index
+	            String[] targetOLT_NE_ID = finalData.get(z);
+
+	            List<String[]> data = new ArrayList<>();
+	            for (String[] row : finalData) {
+	                if (row[1].equals(targetOLT_NE_ID[1])) {
+	                    data.add(row);
+	                }
+	            
+	            
+	            System.out.println("data: " + data);
+	           		            
+	            }  
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+       @RestController
+   	@RequestMapping("/get_lat_long")
+   	public class LatLongController {
+
+   	    @GetMapping
+   	    @PostMapping
+   	    public ResponseEntity<Map<String, Object>> getCoord(@RequestBody Map<String, Object> req) {
+   	        Map<String, Object> data = new HashMap<>();
+   	        
+   	        Map<String, List<Double>> d1 = new HashMap<>();
+   	        Map<String, List<Double>> d11 = new HashMap<>();
+   	        
+   	        try {
+   	            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+   	            String line;
+   	            while ((line = reader.readLine()) != null) {
+   	                String[] parts = line.split(",");
+   	                String serialNumber = parts[0];
+   	                double latitude = Double.parseDouble(parts[1]);
+   	                double longitude = Double.parseDouble(parts[2]);
+   	                List<Double> coordinates = new ArrayList<>();
+   	                coordinates.add(latitude);
+   	                coordinates.add(longitude);
+   	                d1.put(serialNumber, coordinates);
+   	            }
+   	            reader.close();
+   	        } catch (IOException e) {
+   	            e.printStackTrace();
+   	        }
+   	        
+   	        try {
+   	            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv"));
+   	            String line;
+   	            while ((line = reader.readLine()) != null) {
+   	                String[] parts = line.split(",");
+   	                String oltNeId = parts[0];
+   	                double latitude = Double.parseDouble(parts[1]);
+   	                double longitude = Double.parseDouble(parts[2]);
+   	                List<Double> coordinates = new ArrayList<>();
+   	                coordinates.add(latitude);
+   	                coordinates.add(longitude);
+   	                d11.put(oltNeId, coordinates);
+   	            }
+   	            reader.close();
+   	        } catch (IOException e) {
+   	            e.printStackTrace();
+   	        }
+   	        
+   	        Map<String, List<Double>> zones = new HashMap<>();
+   	        List<Double> dublin = new ArrayList<>();
+   	        dublin.add(53.350140);
+   	        dublin.add(-6.266155);
+   	        zones.put("Dublin", dublin);
+   	        List<Double> cork = new ArrayList<>();
+   	        cork.add(51.706051);
+   	        cork.add(-8.522501);
+   	        zones.put("Cork", cork);
+   	        List<Double> limerick = new ArrayList<>();
+   	        limerick.add(52.668018);
+   	        limerick.add(-8.630498);
+   	        zones.put("Limerick", limerick);
+   	        List<Double> galway = new ArrayList<>();
+   	        galway.add(53.270962);
+   	        galway.add(-9.062691);
+   	        zones.put("Galway", galway);
+   	        List<Double> kilkeny = new ArrayList<>();
+   	        kilkeny.add(52.5833);
+   	        kilkeny.add(-7.2500);
+   	        zones.put("Kilkeny", kilkeny);
+   	        List<Double> belfast = new ArrayList<>();
+   	        belfast.add(54.607868);
+   	        belfast.add(-5.926437);
+   	        zones.put("Belfast", belfast);
+   	        List<Double> siego = new ArrayList<>();
+   	        siego.add(54.2666667);
+   	        siego.add(-8.4833333);
+   	        zones.put("Siego", siego);
+   	        
+   	        Map<String, List<Double>> sites = new HashMap<>();
+   	        List<Double> shankill = new ArrayList<>();
+   	        shankill.add(54.604301);
+   	        shankill.add(-5.953000);
+   	        sites.put("Shankill", shankill);
+   	        List<Double> kilmainham = new ArrayList<>();
+   	        kilmainham.add(53.3333);
+   	        kilmainham.add(-6.2833);
+   	        sites.put("Kilmainham", kilmainham);
+   	        List<Double> cloyne = new ArrayList<>();
+   	        cloyne.add(51.863097);
+   	        cloyne.add(-8.121237);
+   	        sites.put("Cloyne", cloyne);
+   	        List<Double> adare = new ArrayList<>();
+   	        adare.add(52.564017);
+   	        adare.add(-8.791179);
+   	        sites.put("Adare", adare);
+   	        List<Double> callan = new ArrayList<>();
+   	        callan.add(52.544821);
+   	        callan.add(-7.392033);
+   	        sites.put("Callan", callan);
+   	        List<Double> ballysillan = new ArrayList<>();
+   	        ballysillan.add(54.627243);
+   	        ballysillan.add(-5.966189);
+   	        sites.put("Ballysillan", ballysillan);
+   	        List<Double> enniscrone = new ArrayList<>();
+   	        enniscrone.add(54.212848);
+   	        enniscrone.add(-9.093174);
+   	        sites.put("Enniscrone", enniscrone);
+   	        
+   	        data.put("Zones", zones);
+   	        data.put("Sites", sites);
+   	        data.put("ONT", d1);
+   	        data.put("OLT", d11);
+   	        
+   	        String type = (String) req.get("type");
+   	        String id = (String) req.get("id");
+   	        
+   	        return ResponseEntity.ok().body(Map.of("res", data.get(type)));
+   	    }
+   	}
+       ///////////////////////////////////////////////////////
+       //not done
+   	// It not take csv file
+       @PostMapping("/table_data")
+       public ResponseEntity<Object> tableInfo(@RequestBody Map<String, String> requestData) {
+           System.out.println(requestData);
+
+           String dataType = requestData.get("type");
+           String id = requestData.get("id");
+           String filename = dataType + "_data_new.csv";
+           System.out.println(filename);
+
+                   String resp;
+           if (dataType.equals("OLT")) {
+               if (id.equals("1")) {
+                   resp = "Data for OLT 1";
+               } else {
+                   resp = "No Data";
+               }
+           } else {
+               if (id.equals("A")) {
+                   resp = "Data for ONT A";
+               } else {
+                   resp = "No Data";
+               }
+           }
+
+           Map<String, String> response = new HashMap<>();
+           response.put("resp", resp);
+
+           return ResponseEntity.ok(response);
+       }
+       ///////////////////////////////////////////////////////////
+       //Its give accurate result
+       @GetMapping("/hierrachy_resource")
+
+       public ResponseEntity<Object> getResourceHierarchy() {
+           List<Map<String, Object>> hierarchy = new ArrayList<>();
+           
+           try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_Latest.csv"))) {
+               String line;
+               while ((line = reader.readLine()) != null) {
+                   String[] data = line.split(",");
+                   if (data.length >= 4) {
+                       String zone = data[0];
+                       String site = data[1];
+                       String olt = data[2];
+                       String lt = data[3];
+                       
+                       addToHierarchy(hierarchy, zone, site, olt, lt);
+                   }
+               }
+           } catch (IOException e) {
+               e.printStackTrace();
+               // Handle the exception appropriately
+           }
+           
+           return ResponseEntity.ok(hierarchy);
+       }
+       
+       private void addToHierarchy(List<Map<String, Object>> hierarchy, String zone, String site, String olt, String lt) {
+           Map<String, Object> zoneNode = getNodeWithName(hierarchy, "Zone " + zone);
+           if (zoneNode == null) {
+               zoneNode = createNode("Zone " + zone);
+               hierarchy.add(zoneNode);
+           }
+           
+           List<Map<String, Object>> zoneChildren = (List<Map<String, Object>>) zoneNode.get("children");
+           Map<String, Object> siteNode = getNodeWithName(zoneChildren, "Site " + site);
+           if (siteNode == null) {
+               siteNode = createNode("Site " + site);
+               zoneChildren.add(siteNode);
+           }
+           
+           List<Map<String, Object>> siteChildren = (List<Map<String, Object>>) siteNode.get("children");
+           Map<String, Object> oltNode = getNodeWithName(siteChildren, "OLT " + olt);
+           if (oltNode == null) {
+               oltNode = createNode("OLT " + olt);
+               siteChildren.add(oltNode);
+           }
+           
+           List<Map<String, Object>> oltChildren = (List<Map<String, Object>>) oltNode.get("children");
+           Map<String, Object> ltNode = getNodeWithName(oltChildren, "LT " + lt);
+           if (ltNode == null) {
+               ltNode = createNode("LT " + lt);
+               oltChildren.add(ltNode);
+           }
+       }
+       
+       private Map<String, Object> getNodeWithName(List<Map<String, Object>> nodes, String name) {
+           for (Map<String, Object> node : nodes) {
+               if (node.get("name").equals(name)) {
+                   return node;
+               }
+           }
+           return null;
+       }
+       
+       private Map<String, Object> createNode(String name) {
+           Map<String, Object> node = new HashMap<>();
+           node.put("name", name);
+           node.put("children", new ArrayList<>());
+           return node;
+       }
+       
+       ///////////////////////////////////////////////////////////////////////
+           //Not any output
+       
+       @PostMapping("/hierarchy_info")
+       public Map<String, Object> getHierarchyInfo(@RequestBody Map<String, String> zone) {
+           String zoneValue = zone.get("Zone");
+           String csvFile = "C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv";
+
+           Map<String, Object> finalResult = new HashMap<>();
+           Map<String, Object> zoneResult = new HashMap<>();
+           Map<String, Object> siteResult = new HashMap<>();
+           Map<String, Object> oltResult = new HashMap<>();
+
+           try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+               String[] line;
+               boolean isFirstLine = true;
+
+               while ((line = reader.readNext()) != null) {
+                   if (isFirstLine) {
+                       isFirstLine = false;
+                       continue;
+                   }
+
+                   String currentZone = line[0].trim();
+                   String currentSite = line[1].trim();
+                   String currentOLT = line[2].trim();
+                   String currentLT = line[3].trim();
+                   String currentPON = line[4].trim();
+                   String currentONT = line[5].trim();
+
+                   if (currentZone.equals(zoneValue)) {
+                       oltResult.clear();
+                       siteResult.clear();
+
+                       if (!finalResult.containsKey("Zone " + currentZone)) {
+                           finalResult.put("Zone " + currentZone, zoneResult);
+                       }
+
+                       if (!zoneResult.containsKey("Site " + currentSite)) {
+                           zoneResult.put("Site " + currentSite, siteResult);
+                       }
+
+                       if (!siteResult.containsKey("OLT " + currentOLT)) {
+                           siteResult.put("OLT " + currentOLT, oltResult);
+                       }
+
+                       Map<String, Object> ltResult = (Map<String, Object>) oltResult.get("OLT " + currentOLT);
+                       if (!ltResult.containsKey("LT " + currentLT)) {
+                           ltResult.put("LT " + currentLT, new HashMap<>());
+                       }
+
+                       Map<String, Object> ponResult = (Map<String, Object>) ltResult.get("LT " + currentLT);
+                       if (!ponResult.containsKey("PON " + currentPON)) {
+                           ponResult.put("PON " + currentPON, new HashMap<>());
+                       }
+
+                       Map<String, Object> ontResult = (Map<String, Object>) ponResult.get("PON " + currentPON);
+                       ontResult.put("ONT " + currentONT, new HashMap<>());
+                   }
+               }
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+
+           return finalResult;
+       }
+       ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       //not done
+       @GetMapping("/get_zone_with_olt")
+       public ResponseEntity<List<ZoneData>> getZoneOltOnt(@RequestParam String zone) {
+           try {
+               List<ZoneData> zoneDataList = new ArrayList<>();
+               List<String> zones = readZoneData("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Zone_data.csv");
+
+               if (!zones.contains(zone)) {
+                   return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+               }
+
+               List<InventoryData> inventoryDataList = filterInventoryDataByZone(zone, "C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv");
+               Set<String> oltSet = new HashSet<>();
+               Set<String> ontSet = new HashSet<>();
+
+               for (InventoryData inventoryData : inventoryDataList) {
+                   oltSet.add(inventoryData.getOlt());
+                   ontSet.add(inventoryData.getSerialNumber());
+               }
+
+               zoneDataList.add(new ZoneData(zone, oltSet.size(), ontSet.size()));
+
+               return new ResponseEntity<>(zoneDataList, HttpStatus.OK);
+           } catch (IOException e) {
+               e.printStackTrace();
+               return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+           }
+       }
+
+       private List<String> readZoneData(String filePath) throws IOException {
+           List<String> zones = new ArrayList<>();
+
+           List<String> lines = Files.readAllLines(Paths.get(filePath));
+           for (String line : lines) {
+               String[] data = line.split(",");
+               if (data.length > 0) {
+                   zones.add(data[0]);
+               }
+           }
+
+           return zones;
+       }
+
+       private List<InventoryData> filterInventoryDataByZone(String zone, String filePath) throws IOException {
+           List<InventoryData> filteredData = new ArrayList<>();
+
+           List<String> lines = Files.readAllLines(Paths.get(filePath));
+           for (String line : lines) {
+               String[] data = line.split(",");
+               if (data.length >= 7 && data[6].equals(zone)) {
+                   String olt = data[1];
+                   String ont = data[4];
+                   filteredData.add(new InventoryData(olt, ont));
+               }
+           }
+
+           return filteredData;
+       }
+   }
+
+   class ZoneData {
+       private String zone;
+       private int numberOfOLTs;
+       private int numberOfONTs;
+
+       public ZoneData(String zone, int numberOfOLTs, int numberOfONTs) {
+           this.zone = zone;
+           this.numberOfOLTs = numberOfOLTs;
+           this.numberOfONTs = numberOfONTs;
+       }
+
+       public String getZone() {
+           return zone;
+       }
+
+       public void setZone(String zone) {
+           this.zone = zone;
+       }
+
+       public int getNumberOfOLTs() {
+           return numberOfOLTs;
+       }
+
+       public void setNumberOfOLTs(int numberOfOLTs) {
+           this.numberOfOLTs = numberOfOLTs;
+       }
+
+       public int getNumberOfONTs() {
+           return numberOfONTs;
+       }
+
+       public void setNumberOfONTs(int numberOfONTs) {
+           this.numberOfONTs = numberOfONTs;
+       }
+   }
+
+   class InventoryData {
+       private String olt;
+       private String serialNumber;
+
+       public InventoryData(String olt, String serialNumber) {
+           this.olt = olt;
+           this.serialNumber = serialNumber;
+       }
+
+       public String getOlt() {
+           return olt;
+       }
+
+       public void setOlt(String olt) {
+           this.olt = olt;
+       }
+
+       public String getSerialNumber() {
+           return serialNumber;
+       }
+
+       public void setSerialNumber(String serialNumber) {
+           this.serialNumber = serialNumber;
+       }
+
+
+}
+}

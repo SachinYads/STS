@@ -1,0 +1,12 @@
+,Unnamed: 0,Receive signal level ,transmit signal level,Optics temperature,Optics voltage,Laser bias current,Admin/operational Status,Error condition (status),Traffic statistics CRC/Align Errors,Traffic statistics CRC/Align Errored,Traffic statisticsCRC/Align Dropped,ONT Utilisation DS%,ONT Utilisation US%,Downstream CWE,Downstream CCW,Downstream BER,Upstream CCW,Upstream BER,PON_ID
+0,0,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON2
+1,1,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON3
+2,2,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON15
+3,3,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON1
+4,4,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON4
+5,5,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON5
+6,6,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON7
+7,7,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON6
+8,8,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON9
+9,9,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON10
+10,0,-18.2dBm,5.7dBm,34oC,3.36V,139.84mA,UP,OK,1,0,0,33,15,0,0.0001,0,0,0,PON8

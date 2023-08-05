@@ -1,0 +1,31 @@
+package com.prodapt.restfulapp.service;
+
+import java.util.ArrayList;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.prodapt.restfulapp.model.DAOUser;
+import com.prodapt.restfulapp.model.UserDTO;
+
+@Service
+public class JwtUserDetailsService implements UserDetailsService{
+
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+		if("prabhat".equals(username)) {
+			return new User("prabhat","$2y$10$Z5SmRoKXsXKQ2v5G1d6D3.TA7lRt0nHpjiO7/0eTdNwhLkw4PfzJ2",new ArrayList());
+		}else {
+			throw new UsernameNotFoundException("User not found with username---"+username);
+		}
+	}
+	public DAOUser save(UserDTO user) {
+		DAOUser newUser = new DAOUser();
+		newUser.setUsername(user.getUsername());
+		newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
+		return userDao.save(newUser);
+	}
+
+
+}

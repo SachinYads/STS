@@ -1,0 +1,518 @@
+package com.sts;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.google.gson.JsonArray;
+import com.opencsv.CSVReader;
+
+@RestController
+public class CoordinateController {
+
+	@RestController
+	@RequestMapping("/get_lat_long")
+	public class LatLongController {
+
+	    @GetMapping
+	    @PostMapping
+	    public ResponseEntity<Map<String, Object>> getCoord(@RequestBody Map<String, Object> req) {
+	        Map<String, Object> data = new HashMap<>();
+	        
+	        Map<String, List<Double>> d1 = new HashMap<>();
+	        Map<String, List<Double>> d11 = new HashMap<>();
+	        
+	        try {
+	            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+	            String line;
+	            while ((line = reader.readLine()) != null) {
+	                String[] parts = line.split(",");
+	                String serialNumber = parts[0];
+	                double latitude = Double.parseDouble(parts[1]);
+	                double longitude = Double.parseDouble(parts[2]);
+	                List<Double> coordinates = new ArrayList<>();
+	                coordinates.add(latitude);
+	                coordinates.add(longitude);
+	                d1.put(serialNumber, coordinates);
+	            }
+	            reader.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        
+	        try {
+	            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv"));
+	            String line;
+	            while ((line = reader.readLine()) != null) {
+	                String[] parts = line.split(",");
+	                String oltNeId = parts[0];
+	                double latitude = Double.parseDouble(parts[1]);
+	                double longitude = Double.parseDouble(parts[2]);
+	                List<Double> coordinates = new ArrayList<>();
+	                coordinates.add(latitude);
+	                coordinates.add(longitude);
+	                d11.put(oltNeId, coordinates);
+	            }
+	            reader.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        
+	        Map<String, List<Double>> zones = new HashMap<>();
+	        List<Double> dublin = new ArrayList<>();
+	        dublin.add(53.350140);
+	        dublin.add(-6.266155);
+	        zones.put("Dublin", dublin);
+	        List<Double> cork = new ArrayList<>();
+	        cork.add(51.706051);
+	        cork.add(-8.522501);
+	        zones.put("Cork", cork);
+	        List<Double> limerick = new ArrayList<>();
+	        limerick.add(52.668018);
+	        limerick.add(-8.630498);
+	        zones.put("Limerick", limerick);
+	        List<Double> galway = new ArrayList<>();
+	        galway.add(53.270962);
+	        galway.add(-9.062691);
+	        zones.put("Galway", galway);
+	        List<Double> kilkeny = new ArrayList<>();
+	        kilkeny.add(52.5833);
+	        kilkeny.add(-7.2500);
+	        zones.put("Kilkeny", kilkeny);
+	        List<Double> belfast = new ArrayList<>();
+	        belfast.add(54.607868);
+	        belfast.add(-5.926437);
+	        zones.put("Belfast", belfast);
+	        List<Double> siego = new ArrayList<>();
+	        siego.add(54.2666667);
+	        siego.add(-8.4833333);
+	        zones.put("Siego", siego);
+	        
+	        Map<String, List<Double>> sites = new HashMap<>();
+	        List<Double> shankill = new ArrayList<>();
+	        shankill.add(54.604301);
+	        shankill.add(-5.953000);
+	        sites.put("Shankill", shankill);
+	        List<Double> kilmainham = new ArrayList<>();
+	        kilmainham.add(53.3333);
+	        kilmainham.add(-6.2833);
+	        sites.put("Kilmainham", kilmainham);
+	        List<Double> cloyne = new ArrayList<>();
+	        cloyne.add(51.863097);
+	        cloyne.add(-8.121237);
+	        sites.put("Cloyne", cloyne);
+	        List<Double> adare = new ArrayList<>();
+	        adare.add(52.564017);
+	        adare.add(-8.791179);
+	        sites.put("Adare", adare);
+	        List<Double> callan = new ArrayList<>();
+	        callan.add(52.544821);
+	        callan.add(-7.392033);
+	        sites.put("Callan", callan);
+	        List<Double> ballysillan = new ArrayList<>();
+	        ballysillan.add(54.627243);
+	        ballysillan.add(-5.966189);
+	        sites.put("Ballysillan", ballysillan);
+	        List<Double> enniscrone = new ArrayList<>();
+	        enniscrone.add(54.212848);
+	        enniscrone.add(-9.093174);
+	        sites.put("Enniscrone", enniscrone);
+	        
+	        data.put("Zones", zones);
+	        data.put("Sites", sites);
+	        data.put("ONT", d1);
+	        data.put("OLT", d11);
+	        
+	        String type = (String) req.get("type");
+	        String id = (String) req.get("id");
+	        
+	        return ResponseEntity.ok().body(Map.of("res", data.get(type)));
+	    }
+	}
+    ///////////////////////////////////////////////////////
+    //not done
+    @PostMapping("/table_data")
+    public ResponseEntity<Object> tableInfo(@RequestBody Map<String, String> requestData) {
+        System.out.println("Hello");
+        System.out.println(requestData);
+
+        String dataType = requestData.get("type");
+        String id = requestData.get("id");
+        String filename = dataType + "_data_new.csv";
+        System.out.println(filename);
+
+        // Read the CSV file
+        // Implement the logic to retrieve data from the CSV file based on the provided type and id
+        // Replace the following code with your own implementation
+        String resp;
+        if (dataType.equals("OLT")) {
+            if (id.equals("1")) {
+                resp = "Data for OLT 1";
+            } else {
+                resp = "No Data";
+            }
+        } else {
+            if (id.equals("A")) {
+                resp = "Data for ONT A";
+            } else {
+                resp = "No Data";
+            }
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("resp", resp);
+
+        return ResponseEntity.ok(response);
+    }
+    ///////////////////////////////////////////////////////////
+    //Its give accurate result
+    @GetMapping("/hierrachy_resource")
+
+    public ResponseEntity<Object> getResourceHierarchy() {
+        List<Map<String, Object>> hierarchy = new ArrayList<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_Latest.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 4) {
+                    String zone = data[0];
+                    String site = data[1];
+                    String olt = data[2];
+                    String lt = data[3];
+                    
+                    addToHierarchy(hierarchy, zone, site, olt, lt);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception appropriately
+        }
+        
+        return ResponseEntity.ok(hierarchy);
+    }
+    
+    private void addToHierarchy(List<Map<String, Object>> hierarchy, String zone, String site, String olt, String lt) {
+        Map<String, Object> zoneNode = getNodeWithName(hierarchy, "Zone " + zone);
+        if (zoneNode == null) {
+            zoneNode = createNode("Zone " + zone);
+            hierarchy.add(zoneNode);
+        }
+        
+        List<Map<String, Object>> zoneChildren = (List<Map<String, Object>>) zoneNode.get("children");
+        Map<String, Object> siteNode = getNodeWithName(zoneChildren, "Site " + site);
+        if (siteNode == null) {
+            siteNode = createNode("Site " + site);
+            zoneChildren.add(siteNode);
+        }
+        
+        List<Map<String, Object>> siteChildren = (List<Map<String, Object>>) siteNode.get("children");
+        Map<String, Object> oltNode = getNodeWithName(siteChildren, "OLT " + olt);
+        if (oltNode == null) {
+            oltNode = createNode("OLT " + olt);
+            siteChildren.add(oltNode);
+        }
+        
+        List<Map<String, Object>> oltChildren = (List<Map<String, Object>>) oltNode.get("children");
+        Map<String, Object> ltNode = getNodeWithName(oltChildren, "LT " + lt);
+        if (ltNode == null) {
+            ltNode = createNode("LT " + lt);
+            oltChildren.add(ltNode);
+        }
+    }
+    
+    private Map<String, Object> getNodeWithName(List<Map<String, Object>> nodes, String name) {
+        for (Map<String, Object> node : nodes) {
+            if (node.get("name").equals(name)) {
+                return node;
+            }
+        }
+        return null;
+    }
+    
+    private Map<String, Object> createNode(String name) {
+        Map<String, Object> node = new HashMap<>();
+        node.put("name", name);
+        node.put("children", new ArrayList<>());
+        return node;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////
+    //Not any output
+    @PostMapping("/hierarchy_info")
+    public Map<String, Object> getHierarchyInfo(@RequestBody Map<String, String> zone) {
+        String zoneValue = zone.get("Zone");
+        String csvFile = "C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv";
+
+        Map<String, Object> finalResult = new HashMap<>();
+        Map<String, Object> zoneResult = new HashMap<>();
+        Map<String, Object> siteResult = new HashMap<>();
+        Map<String, Object> oltResult = new HashMap<>();
+
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            String[] line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                String currentZone = line[0].trim();
+                String currentSite = line[1].trim();
+                String currentOLT = line[2].trim();
+                String currentLT = line[3].trim();
+                String currentPON = line[4].trim();
+                String currentONT = line[5].trim();
+
+                if (currentZone.equals(zoneValue)) {
+                    oltResult.clear();
+                    siteResult.clear();
+
+                    if (!finalResult.containsKey("Zone " + currentZone)) {
+                        finalResult.put("Zone " + currentZone, zoneResult);
+                    }
+
+                    if (!zoneResult.containsKey("Site " + currentSite)) {
+                        zoneResult.put("Site " + currentSite, siteResult);
+                    }
+
+                    if (!siteResult.containsKey("OLT " + currentOLT)) {
+                        siteResult.put("OLT " + currentOLT, oltResult);
+                    }
+
+                    Map<String, Object> ltResult = (Map<String, Object>) oltResult.get("OLT " + currentOLT);
+                    if (!ltResult.containsKey("LT " + currentLT)) {
+                        ltResult.put("LT " + currentLT, new HashMap<>());
+                    }
+
+                    Map<String, Object> ponResult = (Map<String, Object>) ltResult.get("LT " + currentLT);
+                    if (!ponResult.containsKey("PON " + currentPON)) {
+                        ponResult.put("PON " + currentPON, new HashMap<>());
+                    }
+
+                    Map<String, Object> ontResult = (Map<String, Object>) ponResult.get("PON " + currentPON);
+                    ontResult.put("ONT " + currentONT, new HashMap<>());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return finalResult;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //not done
+    /*
+ @RestController
+    @RequestMapping("/get_zone_with_olt")
+    public class ZoneController {
+
+        @GetMapping
+        @PostMapping
+        public JSONArray getZoneOltOnt() {
+            List<String> data2 = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Zone_data.csv"))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(",");
+                    data2.add(values[0]);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Set<String> uniqueData2 = new HashSet<>(data2);
+            List<JSONObject> finalData = new ArrayList<>();
+            for (String z : uniqueData2) {
+                List<String> noOfOLTs = new ArrayList<>();
+                List<String> noOfONTs = new ArrayList<>();
+                try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] values = line.split(",");
+                        if (values[0].equals(z)) {
+                            noOfOLTs.add(values[1]);
+                            noOfONTs.add(values[2]);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                finalData.add(new JSONObject() {{
+                    put(z, new JSONArray() {{
+                     //   add(noOfOLTs.size());
+                      //  add(noOfONTs.size());
+                    }});
+                }});
+            }
+            return new JSONArray(finalData);
+        }
+    }*/
+        //////////////////////////////////////////////////////////////////////////
+    @RestController
+    @RequestMapping("/olt_geo")
+    public class OltGeoController {
+
+        @GetMapping
+        @PostMapping
+        public List<Object> getZoneLatLong() {
+            List<Object> finalData = new ArrayList<>();
+            try {
+                BufferedReader dfReader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv"));
+                String dfLine;
+                while ((dfLine = dfReader.readLine()) != null) {
+                    String[] dfData = dfLine.split(",");
+                    String oltNeId = dfData[0];
+                    String latitude = dfData[1];
+                    String longitude = dfData[2];
+                    Map<String, String> resp = new HashMap<>();
+                    BufferedReader invLatestReader = new BufferedReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv"));
+                    String invLatestLine;
+                    while ((invLatestLine = invLatestReader.readLine()) != null) {
+                        String[] invLatestData = invLatestLine.split(",");
+                        if (invLatestData[0].equals(oltNeId)) {
+                            resp.put(invLatestData[1], invLatestData[2]);
+                        }
+                    }
+                    invLatestReader.close();
+                    finalData.add(new Object[]{oltNeId, latitude, longitude, resp});
+                }
+                dfReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return finalData;
+        }
+    }
+  ////////////////////////////////////////////////////////////////////////////////////////
+    @GetMapping("/ont_geo")//done
+    public List<Object> getONTGeo() {
+        List<Object> finalData = new ArrayList<>();
+
+        try {
+            // Read ONT data
+            // Assuming ONT data is available in a CSV file called "ONT_data_new.csv"
+            // Adjust the file path accordingly
+            // Assuming the columns are named "Serialnumber", "Latitude", and "Longitude"
+            CSVReader ontDataReader = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+            String[] ontHeaders = ontDataReader.readNext();
+            String[] ontRecord;
+            while ((ontRecord = ontDataReader.readNext()) != null) {
+                String serialNumber = ontRecord[0];
+                String latitude = ontRecord[1];
+                String longitude = ontRecord[2];
+
+                // Get additional data for the ONT
+                Map<String, String> additionalData = new HashMap<>();
+                for (int i = 3; i < ontHeaders.length; i++) {
+                    additionalData.put(ontHeaders[i], ontRecord[i]);
+                }
+
+                // Create the final data object
+                Object[] data = {serialNumber, latitude, longitude, additionalData};
+                finalData.add(data);
+            }
+            ontDataReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return finalData;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //notdone
+    @PostMapping("/polyline_data")
+    public List<List<List<Double>>> getPolylineData(@RequestBody OltIdRequest oltId) {
+        List<List<List<Double>>> latLong = new ArrayList<>();
+
+        try {
+            // Read OLT data
+            // Assuming OLT data is available in a CSV file called "OLT_data_new.csv"
+            // Adjust the file path accordingly
+            CSVReader oltDataReader = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\OLT_data_new.csv"));
+            String[] oltDataHeader = oltDataReader.readNext(); // Skip header line
+            String[] oltRecord;
+            while ((oltRecord = oltDataReader.readNext()) != null) {
+                String oltNEID = oltRecord[0];
+                Double oltLatitude = Double.parseDouble(oltRecord[1]);
+                Double oltLongitude = Double.parseDouble(oltRecord[2]);
+
+                if (oltNEID.equals("DTAL008")) {
+                    // Read inventory data
+                    // Assuming inventory data is available in a CSV file called "Inventory_data_new.csv"
+                    // Adjust the file path accordingly
+                    CSVReader inventoryDataReader = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv"));
+                    String[] inventoryDataHeader = inventoryDataReader.readNext(); // Skip header line
+                    String[] inventoryRecord;
+                    while ((inventoryRecord = inventoryDataReader.readNext()) != null) {
+                        String olt = inventoryRecord[0];
+                        String serialNumber = inventoryRecord[1];
+
+                        if (olt.equals(oltNEID)) {
+                            // Read ONT data
+                            // Assuming ONT data is available in a CSV file called "ONT_data_new.csv"
+                            // Adjust the file path accordingly
+                        //	CSVReader oltDataReader1 = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+                            CSVReader ontDataReader = new CSVReader(new FileReader("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\ONT_data_new.csv"));
+                            String[] ontDataHeader = ontDataReader.readNext(); // Skip header line
+                            String[] ontRecord;
+                            while ((ontRecord = ontDataReader.readNext()) != null) {
+                                String ontSerialNumber = ontRecord[0];
+                                Double ontLatitude = Double.parseDouble(ontRecord[1]);
+                                Double ontLongitude = Double.parseDouble(ontRecord[2]);
+
+                                if (ontSerialNumber.equals(serialNumber)) {
+                                    // Create the lat-long coordinates for the polyline
+                                    List<List<Double>> polylineCoordinates = new ArrayList<>();
+                                    polylineCoordinates.add(List.of(oltLatitude, oltLongitude));
+                                    polylineCoordinates.add(List.of(ontLatitude, ontLongitude));
+                                    latLong.add(polylineCoordinates);
+
+                                    break;
+                                }
+                            }
+                            ontDataReader.close();
+
+                            break;
+                        }
+                    }
+                    inventoryDataReader.close();
+
+                    break;
+                }
+            }
+            oltDataReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+       
+        return latLong;
+    }
+
+    public static class OltIdRequest {
+        private String OLT;
+
+        public String getOLT() {
+            return OLT;
+        }
+
+        public void setOLT(String OLT) {
+            this.OLT = OLT;
+        }
+    }}

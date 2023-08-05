@@ -1,0 +1,214 @@
+package com.sts;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+@RestController
+@CrossOrigin(origins = "http://localhost:4200")
+public class TestController {	
+	  @RestController
+	    @RequestMapping("/olt_geo")
+	    public class OltGeoController {
+	        @GetMapping
+	        @PostMapping
+	        public ResponseEntity<List<Object>> getZoneLatLong() {
+	            List<Object> finalData = new ArrayList<>();
+
+	            try {
+	                CSVReader dfReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv"));
+	                List<String[]> dfList = dfReader.readAll();
+	                dfReader.close();
+	                CSVReader invReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv"));
+	                List<String[]> invList = invReader.readAll();
+	                invReader.close();
+
+
+	                for (int z = 0; z < dfList.size(); z++) {
+	                    String[] dfRow = dfList.get(z);
+
+	                    System.out.println(z);
+	                    Map<String, String> resp = new HashMap<>();
+	                    List<Object> row = new ArrayList<>();
+
+	                    for (int i = 0; i < dfRow.length; i++) {
+	                        String columnName = dfList.get(0)[i];
+	                        String columnValue = dfRow[i];
+	                        resp.put(columnName, columnValue);
+	                    }
+
+	                    String OLT_NE_ID = dfRow[1];
+	                    String latitude = dfRow[32];
+	                    String longitude = dfRow[33];
+	                    int invCount = 0;
+
+	                    for (String[] invRow : invList) {
+	                        String olt = invRow[1];
+	                        if (olt.equals(OLT_NE_ID)) {
+	                            invCount++;
+	                        }
+	                    }
+	                    row.add(OLT_NE_ID);
+	                    row.add(latitude);
+	                    row.add(longitude);
+	                    row.add(resp);
+	                    row.add(invCount);
+	                    finalData.add(row);
+	                }
+
+	                return ResponseEntity.ok(finalData);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	            }
+	        }
+	    }
+	 @GetMapping("/ont_geo")
+	    public List<Object> getONTGeo() {
+	        List<Object> finalData = new ArrayList<>();
+
+	        try {
+	            
+	            CSVReader ontDataReader = new CSVReader(new FileReader("D:\\KPN_DEMO\\BackEnd\\ONT_data_new.csv"));
+	            String[] ontHeaders = ontDataReader.readNext();
+	            String[] ontRecord;
+	            while ((ontRecord = ontDataReader.readNext()) != null) {
+	                String serialNumber = ontRecord[6];
+	                String latitude = ontRecord[17];
+	                String longitude = ontRecord[16];
+
+	                Map<String, String> additionalData = new HashMap<>();
+	                for (int i = 0; i < ontHeaders.length; i++) {
+	                    additionalData.put(ontHeaders[i], ontRecord[i]);
+	                }
+
+	                Object[] data = {serialNumber, latitude, longitude, additionalData};
+	                finalData.add(data);
+	            }
+	            ontDataReader.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return finalData;
+	    }
+
+	  
+	
+	 @RestController
+     public class PolylineDataController {
+
+		 @PostMapping("/polyline_data")
+		    public List<List<List<Double>>> polylineData(@RequestBody Map<String, String> oltId) throws CsvException {
+		        List<List<Double>> coordinates = new ArrayList<>();
+		        List<List<List<Double>>> latLong = new ArrayList<>();
+		        List<String[]> ontLatLong = new ArrayList<>();
+		           String oltIdValue = oltId.get("OLT");
+				   System.out.println("old id: " + oltIdValue);
+				   
+		 		   List<String[]> oltData = readCSV("D:\\KPN_DEMO\\BackEnd\\OLT_data_new.csv");
+		 		   
+		 		        List<String[]> oltLatLong = new ArrayList<>();
+		 		        for (String[] row : oltData) {
+     		            if (row[1].equals(oltIdValue)) {
+		 		                oltLatLong.add(row);		
+		            }
+		 		        }
+		 		        
+		 		        System.out.println((oltLatLong));
+		 		        System.out.println("Latitude:" + oltLatLong.get(0)[33]);
+		 		        System.out.println("Longitude:" + oltLatLong.get(0)[32]);	
+		 		        
+		 		        List<String[]> ontData = readCSV("D:\\KPN_DEMO\\BackEnd\\ONT_data_new.csv");
+		 		        System.out.println("check print1: ");
+		 		        List<String[]> inventoryData = readCSV("D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv");
+
+//		 		        String csvFile = "D:\\KPN_DEMO\\BackEnd\\Inventory_data_new.csv";
+		 		                List<String> serialNumbers = new ArrayList<>();
+		 		                 for (String[] row : inventoryData) {
+		 		                     if (row[1].equals(oltIdValue)) {
+		 		                         serialNumbers.add(row[5]);
+				                     }
+		 		                 }
+		 		                 for (String ont : serialNumbers) {
+		 	                     System.out.println(ont);
+		 		                 
+		        		 		 
+		 
+		                     for (String[] row : ontData) {
+
+		 		                   if (row[6].equals(ont)) {
+		                             ontLatLong.add(row);
+		                             System.out.println("datatatata"+row[6]);
+		 		                         }
+		                     }
+		 		                 }
+		                     System.out.println("latitude ="+ontLatLong.get(0)[16]);
+		                     System.out.println("longitude ="+ontLatLong.get(0)[17]);
+		                     
+		           String oltLong=oltLatLong.get(0)[32];
+		           System.out.println("oltLong"+oltLong);
+		           String oltlatLong=oltLatLong.get(0)[33];
+		           String ontLong=ontLatLong.get(0)[16];
+		           String ontlatLong=ontLatLong.get(0)[17];
+
+		           String oltnumeric = oltLong.replaceAll("[^0-9.-]", "");
+		           String oltlatnumeric = oltlatLong.replaceAll("[^0-9.-]", "");
+		           String ontnumeric = ontLong.replaceAll("[^0-9.-]", "");
+		           String ontlatnumeric = ontlatLong.replaceAll("[^0-9.-]", "");	 
+
+		            coordinates.add(Arrays.asList(Double.parseDouble(oltnumeric),Double.parseDouble(oltlatnumeric)));
+		            coordinates.add(Arrays.asList(Double.parseDouble(ontnumeric),Double.parseDouble(ontlatnumeric)));
+                
+		            latLong.add(coordinates);
+	                System.out.println("coordinates ="+coordinates);
+
+		 	      
+		                 System.out.println("lat log data from polyline data: " + latLong);
+		        return latLong;
+		    }
+
+		    private List<String[]> readCSV(String filePath) throws CsvException {
+	        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+		            return reader.readAll();
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+		        return new ArrayList<>();		 
+		    }
+		 }
+}
+	 
+
+	
+		 
+	   	    
+	   	   
+	
+
+	
+
+
+	
+
+
+
+
+
+
+
+	
+	
+   

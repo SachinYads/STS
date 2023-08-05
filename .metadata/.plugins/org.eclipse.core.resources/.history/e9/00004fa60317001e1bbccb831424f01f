@@ -1,0 +1,283 @@
+package com.sts;
+
+import java.awt.PageAttributes.MediaType;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
+/// these one is run properly
+@RestController
+public class TestController {
+	@GetMapping("/get_zone")
+    public String getZoneNames() throws IOException {
+        ClassPathResource resource = new ClassPathResource("Zone_data.csv");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+
+        List<String> zoneNames = new ArrayList<>();
+
+        // Skip the header line
+        reader.readLine();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] values = line.split(",");
+            zoneNames.add(values[1]);
+        }
+
+        reader.close();
+
+        // Convert the list to JSON using Gson
+        Gson gson = new Gson();
+        return gson.toJson(zoneNames);
+    }
+	//////////////////////////////////////
+	//These one aloso give proper result
+	@RestController
+	@RequestMapping("/alarms_table")
+	public class AlarmsController {
+
+	    @GetMapping(produces = "application/json")
+	    public String getAlarmsData() throws IOException {
+	        ClassPathResource resource = new ClassPathResource("alarms_data.json");
+	        InputStream inputStream = resource.getInputStream();
+	        String alarmsData = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+	        return alarmsData;
+	    }}
+/////////////////////////////////////////////////////////////////////////////////////
+	//These one also give proper result
+	@RestController
+	@RequestMapping("/alarm_cards")
+	public class AlarmCardsController {
+		@PostMapping
+	    public ResponseEntity<Object> getAlarmCards(@RequestBody DurationRequest requestData) {
+	        String duration = requestData.getDuration();
+
+	        if (duration.equalsIgnoreCase("24hr")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":1},\"Clear\":{\"critical\":0,\"major\":0,\"minor\":1}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1week")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":4,\"equipmentAlarm\":2},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":1,\"SA_SERVICE_AFFECTING\":5},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":2},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1month")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":4,\"minor\":7},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else {
+	            String errorMessage = "{\"error\":\"Invalid duration\"}";
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	        }
+	    }
+
+	    public static class DurationRequest {
+	        private String duration;
+
+	        public String getDuration() {
+	            return duration;
+	        }
+
+	        public void setDuration(String duration) {
+	            this.duration = duration;
+	        }
+	    }
+	}
+	@RestController
+	public class InventoryController {
+
+	    public static class FilterRequest {
+	        private String zone;
+
+	        public String getZone() {
+	            return zone;
+	        }
+
+	        public void setZone(String zone) {
+	            this.zone = zone;
+	        }
+	    }
+
+	    public static class FilterResponse {
+	        private Set<String> sites;
+	        private Set<String> olts;
+	        private List<String> onts;
+
+	        public Set<String> getSites() {
+	            return sites;
+	        }
+
+	        public void setSites(Set<String> sites) {
+	            this.sites = sites;
+	        }
+
+	        public Set<String> getOlts() {
+	            return olts;
+	        }
+
+	        public void setOlts(Set<String> olts) {
+	            this.olts = olts;
+	        }
+
+	        public List<String> getOnts() {
+	            return onts;
+	        }
+
+	        public void setOnts(List<String> onts) {
+	            this.onts = onts;
+	        }
+	    }
+///////////////////////////////////////////////////////
+	    @RestController
+	    @RequestMapping("/filter")
+	    @ComponentScan("com.sts")
+	    public class FilterController {
+
+	        private CSVLoader csvLoader; // Assuming you have a CSVLoader class
+
+	        public FilterController(CSVLoader csvLoader) {
+	            this.csvLoader = csvLoader;
+	        }
+
+	        @PostMapping
+	        public FilterResponse filterData(@RequestBody ZoneRequest zoneRequest) {
+	            // Load data from CSV
+	            List<String[]> data = csvLoader.loadDataFromCSV("C:\\Users\\sachin.ys\\Desktop\\MyTask\\BackEnd\\Inventory_data_new.csv");
+	            String selectedZone = zoneRequest.getZone();
+	            List<String[]> filteredData = new ArrayList<>();
+	            int dataColumnIndex = 0; // Replace with the actual index of the "Zone" column
+	            for (String[] row : data) {
+	                if (row[dataColumnIndex].equals(selectedZone)) {
+	                    filteredData.add(row);
+	                }
+	            }
+	            List<String> site = new ArrayList<>();
+	            List<String> olt = new ArrayList<>();
+	            List<String> ont = new ArrayList<>();
+
+	            for (String[] val :filteredData) {
+	                if (val[2].equals(selectedZone)) {
+	                    site.add(val[6]);
+	                    olt.add(val[1]);
+	                    ont.add(val[4]);
+	                }
+	            }
+
+	            return new FilterResponse(new HashSet<>(site), new HashSet<>(olt), ont);
+	        }
+
+	        public List<String[]> loadDataFromCSV(String csvFilePath) {
+	            List<String[]> data = new ArrayList<>();
+
+	            try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+	                // Skip the header row if it exists
+	                String header = reader.readLine();
+
+	                String line;
+	                while ((line = reader.readLine()) != null) {
+	                    String[] values = line.split(",");
+	                    data.add(values);
+	                }
+	            } catch (IOException e) {
+	                // Handle exception if the CSV file cannot be read
+	                e.printStackTrace();
+	            }
+
+	            return data;
+	        }
+	        public static class ZoneRequest {
+	            private String zone;
+
+	            public String getZone() {
+	                return zone;
+	            }
+
+	            public void setZone(String zone) {
+	                this.zone = zone;
+	            }
+	        }
+
+	        public static class FilterResponse {
+	            private Set<String> sites;
+	            private Set<String> olts;
+	            private List<String> onts;
+
+	            public FilterResponse(Set<String> site, Set<String> olt, List<String> ont) {
+	                this.sites = site;
+	                this.olts = olt;
+	                this.onts = ont;
+	            }
+
+	            public Set<String> getSites() {
+	                return sites;
+	            }
+
+	            public Set<String> getOlts() {
+	                return olts;
+	            }
+
+	            public List<String> getOnts() {
+	                return onts;
+	            }
+	        }
+	    }	
+
+
+	
+	}
+	//////////////////////////////////////////////////
+	
+			
+}
+	
+
+
+	
+
+
+
+
+
+
+
+	
+	
+   

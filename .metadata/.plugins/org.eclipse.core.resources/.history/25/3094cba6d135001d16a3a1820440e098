@@ -1,0 +1,10 @@
+package com.pecuniaPay.services;
+import java.util.Optional;
+
+import com.pecuniaPay.entity.Customer;
+import com.pecuniaPay.entity.Registration;
+public interface RegistrationService {
+	public Customer saveNewUser(Registration userDetails);
+	
+	public Optional<Registration> getUserDetailsById(Long id) throws RegistrationClassNotFound;
+}

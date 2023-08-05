@@ -1,0 +1,48 @@
+@GetMapping("/get_zone_with_olt")
+    public List<Map<String, Object>> getZoneOltOnt() {
+        String zoneDataFilePath = "path/to/your/zone_data.csv"; // Replace with the actual path to your zone data CSV file
+        String inventoryDataFilePath = "path/to/your/inventory_data_new.csv"; // Replace with the actual path to your inventory data CSV file
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        try (Reader zoneDataReader = Files.newBufferedReader(Paths.get(zoneDataFilePath));
+             CSVParser zoneCsvParser = new CSVParser(zoneDataReader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+
+            for (CSVRecord zoneCsvRecord : zoneCsvParser) {
+                String zone = zoneCsvRecord.get("Zone");
+                Map<String, Object> zoneData = new HashMap<>();
+
+                try (Reader inventoryDataReader = Files.newBufferedReader(Paths.get(inventoryDataFilePath));
+                     CSVParser inventoryCsvParser = new CSVParser(inventoryDataReader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+
+                    List<CSVRecord> filteredRecords = inventoryCsvParser.getRecords().stream()
+                            .filter(record -> record.get("Zone").equals(zone))
+                            .collect(Collectors.toList());
+
+                    Set<String> oltSet = new HashSet<>();
+                    Set<String> ontSet = new HashSet<>();
+
+                    for (CSVRecord record : filteredRecords) {
+                        oltSet.add(record.get("OLT"));
+                        ontSet.add(record.get("Serialnumber"));
+                    }
+
+                    zoneData.put("Zone", zone);
+                    zoneData.put("OLTCount", oltSet.size());
+                    zoneData.put("ONTCount", ontSet.size());
+
+                } catch (IOException e) {
+                    // Handle any errors that occur during inventory data file reading or parsing
+                    e.printStackTrace();
+                }
+
+                result.add(zoneData);
+            }
+
+        } catch (IOException e) {
+            // Handle any errors that occur during zone data file reading or parsing
+            e.printStackTrace();
+        }
+
+        return result;
+    }

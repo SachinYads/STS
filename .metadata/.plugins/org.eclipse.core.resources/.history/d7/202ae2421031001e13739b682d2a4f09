@@ -1,0 +1,21 @@
+package exception;
+
+public class TestThrow1 {
+	
+	public static void validate(int age) {
+		if(age<18) {
+			throw new ArithmeticException("Person is under age");
+		}else {
+			System.out.println("Person is valid for voting");
+		}
+	}
+	
+	
+	
+
+	public static void main(String[] args) {
+		validate(18);
+
+	}
+
+}

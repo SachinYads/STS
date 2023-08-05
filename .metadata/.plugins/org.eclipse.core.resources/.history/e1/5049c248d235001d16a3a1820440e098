@@ -1,0 +1,10 @@
+package com.pecuniaPay.valueObjects;
+
+public class CustomerWallet {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

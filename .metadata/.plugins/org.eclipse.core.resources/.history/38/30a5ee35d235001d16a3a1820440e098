@@ -1,0 +1,5 @@
+package com.pecuniaPay.valueObjects;
+
+public class BankAccount {
+
+}

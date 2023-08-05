@@ -1,0 +1,22 @@
+package exception;
+
+public class MultipleCatchBlock {
+
+	public static void main(String[] args) {
+
+		try {
+			String s=null;
+			System.out.println(s.length());
+			
+		}catch(ArithmeticException e) {
+			System.out.println(e);
+		}catch(ArrayIndexOutOfBoundsException e) {
+			System.out.println("ArrayIndexOutOfBoundsException");
+		}catch(NumberFormatException e) {
+			System.out.println("NumberFormatException");
+		}
+		System.out.println("Rest of the code");
+		
+	}
+
+}

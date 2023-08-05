@@ -1,0 +1,5 @@
+package com.pecuniaPay.repositories;
+
+public class RegistrationRepositories {
+
+}

@@ -1,0 +1,377 @@
+ {
+    "Wholesale": {
+        "Customer I1310-01": {
+            "Location 1976890": {
+                "Service ZIRASP2-M0": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-3001-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service Z-M1-INET-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-1M0": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP5-I0109-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-1M21": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-1M22": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-M71": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INETNV-11": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP8-INET-1": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            }
+        },
+        "Customer I1310-02": {
+            "Location 1987651": {
+                "Service ZIRA-INETNV-04": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZRAINET26092022S1": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06062203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-V-INET-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-1M01": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021215": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I0710-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-1V13": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021325": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-M7": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INET-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL22111035": {},
+                            "MultiCast MCUSER::vodafone#ZIRA-INET-03": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                }
+            }
+        },
+        "Customer I1310-03": {
+            "Location 1987666": {
+                "Service ZRAINET15092022S1": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06062203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-1V13": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021325": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I0710-02": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06102202": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I1210-01": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL12102201": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service Z-S6-INET-19": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP1-I1210-02": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL12102202": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-09": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INET-02": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            }
+        },
+        "Customer I1310-04": {
+            "Location 1543876": {
+                "Service ZIRASP2-1V22": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021225": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I1310-02": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL01012200": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL22111035": {},
+                            "MultiCast MCUSER::vodafone#ZIRA-INETNV-03": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-M71": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service Z-S61-INET-18": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INET-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-2M0": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-06": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INET-02": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            }
+        },
+        "Customer I1310-05": {
+            "Location 1698065": {
+                "Service ZIRASP8-INET-2": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP5-I0109-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP1-I0710-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06102203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-09": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP1-I1310-01": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL13102200": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-04": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service Z-S61-INET-18": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INET-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL22111035": {},
+                            "MultiCast MCUSER::vodafone#ZIRA-INET-03": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-3001-01": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            },
+            "Location 1984325": {
+                "Service ZIRASP2-1M0": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZRAINET15092022S1": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06062203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I1310-01": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL13102200": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-MATVEY-INET-07": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP8-INET-1": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-M0": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I0710-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06102203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-03": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL22111035": {},
+                            "MultiCast MCUSER::vodafone#ZIRA-INETNV-03": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I1210-02": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL12102202": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP8-INET": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            },
+            "Location 1987444": {
+                "Service zira-pro-01": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-1M21": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021214": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP1-I1310-02": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL01012200": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP8-INET": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRA-INETNV-06": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZRAINET26092022S1": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL06062203": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRASP2-1M01": {
+                    "PON ZIRA Fiber Internet": {
+                        "OLT ZIRA Fiber Internet": {
+                            "ONT ALCL02021215": {},
+                            "L2 User# vodafone": {}
+                        }
+                    }
+                },
+                "Service ZIRA-INETNV-11": {
+                    "PON ZIRA Fiber Internet": {}
+                },
+                "Service ZIRASP2-M7": {
+                    "PON ZIRA Fiber Internet": {}
+                }
+            }
+        }
+    }
+}
+   

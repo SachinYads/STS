@@ -1,0 +1,253 @@
+package com.sts;
+
+import java.awt.PageAttributes.MediaType;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
+@RestController
+public class TestController {
+	@GetMapping("/get_zone")
+    public String getZoneNames() throws IOException {
+        ClassPathResource resource = new ClassPathResource("Zone_data.csv");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+
+        List<String> zoneNames = new ArrayList<>();
+
+        // Skip the header line
+        reader.readLine();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] values = line.split(",");
+            zoneNames.add(values[1]);
+        }
+
+        reader.close();
+
+        // Convert the list to JSON using Gson
+        Gson gson = new Gson();
+        return gson.toJson(zoneNames);
+    }
+	//////////////////////////////////////
+	@RestController
+	@RequestMapping("/alarms_table")
+	public class AlarmsController {
+
+	    @GetMapping(produces = "application/json")
+	    public String getAlarmsData() throws IOException {
+	        ClassPathResource resource = new ClassPathResource("alarms_data.json");
+	        InputStream inputStream = resource.getInputStream();
+	        String alarmsData = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+	        return alarmsData;
+	    }}
+/////////////////////////////////////////////////////////////////////////////////////
+	
+	@RestController
+	@RequestMapping("/alarm_cards")
+	public class AlarmCardsController {
+		@PostMapping
+	    public ResponseEntity<Object> getAlarmCards(@RequestBody DurationRequest requestData) {
+	        String duration = requestData.getDuration();
+
+	        if (duration.equalsIgnoreCase("24hr")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":1},\"Clear\":{\"critical\":0,\"major\":0,\"minor\":1}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1week")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":4,\"equipmentAlarm\":2},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":1,\"SA_SERVICE_AFFECTING\":5},\"severity\":{\"Active\":{\"critical\":0,\"major\":0,\"minor\":2},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else if (duration.equalsIgnoreCase("1month")) {
+	            System.out.println(duration);
+	            String response = "{\"data\":{\"event_type\":{\"communicationsAlarm\":2,\"equipmentAlarm\":0},\"impact_type\":{\"SA_NON_SERVICE_AFFECTING\":0,\"SA_SERVICE_AFFECTING\":2},\"severity\":{\"Active\":{\"critical\":0,\"major\":4,\"minor\":7},\"Clear\":{\"critical\":2,\"major\":0,\"minor\":2}}}}";
+	            return ResponseEntity.ok(response);
+	        } else {
+	            String errorMessage = "{\"error\":\"Invalid duration\"}";
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	        }
+	    }
+
+	    public static class DurationRequest {
+	        private String duration;
+
+	        public String getDuration() {
+	            return duration;
+	        }
+
+	        public void setDuration(String duration) {
+	            this.duration = duration;
+	        }
+	    }
+	}
+	@PostMapping("/filter")
+    public FilterResponse filterData(@RequestBody ZoneRequest zoneRequest) {
+        List<InventoryData> filteredData = getFilteredData(zoneRequest.getZone());
+        Set<String> sites = new HashSet<>();
+        Set<String> olts = new HashSet<>();
+        List<String> onts = new ArrayList<>();
+
+        // Extract unique sites, olts, and onts
+        for (InventoryData data : filteredData) {
+            sites.add(data.getSite());
+            olts.add(data.getOlt());
+            onts.add(data.getOnt());
+        }
+
+        // Sort sites, olts, and onts
+        List<String> sortedSites = new ArrayList<>(sites);
+        Collections.sort(sortedSites);
+
+        List<String> sortedOlts = new ArrayList<>(olts);
+        Collections.sort(sortedOlts);
+
+        Collections.sort(onts);
+
+        return new FilterResponse(sortedSites, sortedOlts, onts);
+    }
+
+    // Method to retrieve filtered data based on zone
+	private List<InventoryData> getFilteredData(String selectedZone) {
+	    List<InventoryData> filteredData = new ArrayList<>();
+
+	    try (CSVReader reader = new CSVReader(new FileReader("path/to/your/csv/file.csv"))) {
+	        List<String[]> rows = reader.readAll();
+
+	        for (String[] row : rows) {
+	            String zone = row[7]; // Assuming the zone column is at index 7
+
+	            if (zone.equalsIgnoreCase(selectedZone)) {
+	                InventoryData data = new InventoryData();
+	                data.setOlt(row[1]);
+	                data.setOnt(row[4]);
+	                data.setSite(row[6]);
+	                filteredData.add(data);
+	            }
+	        }
+	    } catch (IOException | CsvException e) {
+	        e.printStackTrace(); // Handle the exception appropriately
+	    }
+
+	    return filteredData;
+	}	class ZoneRequest {
+	    private String zone;
+
+	    public String getZone() {
+	        return zone;
+	    }
+
+	    public void setZone(String zone) {
+	        this.zone = zone;
+	    }
+	}
+
+	class FilterResponse {
+	    private List<String> sites;
+	    private List<String> olts;
+	    private List<String> onts;
+
+	    public FilterResponse(List<String> sites, List<String> olts, List<String> onts) {
+	        this.sites = sites;
+	        this.olts = olts;
+	        this.onts = onts;
+	    }
+
+	    public List<String> getSites() {
+	        return sites;
+	    }
+
+	    public List<String> getOlts() {
+	        return olts;
+	    }
+
+	    public List<String> getOnts() {
+	        return onts;
+	    }
+	}
+
+	class InventoryData {
+	    private String olt;
+	    private String ont;
+	    private String site;
+		public String getOlt() {
+			return olt;
+		}
+		public void setOlt(String olt) {
+			this.olt = olt;
+		}
+		public String getOnt() {
+			return ont;
+		}
+		public void setOnt(String ont) {
+			this.ont = ont;
+		}
+		public String getSite() {
+			return site;
+		}
+		public void setSite(String site) {
+			this.site = site;
+		}
+		public InventoryData(String olt, String ont, String site) {
+			super();
+			this.olt = olt;
+			this.ont = ont;
+			this.site = site;
+		}
+
+	    // Constructor, getters, and setters
+	    // ...
+	}
+
+
+
+
+
+
+	
+}
+
+
+	
+
+
+
+
+
+
+
+	
+	
+   
